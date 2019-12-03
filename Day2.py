@@ -12,15 +12,54 @@ input[1]=12
 input[2]=2
 
 # uncomment if you want to use a test input instead
-#input = testinput4
+input[:] = testinput4
 
 #code for part 1
-for i in range(0,len(input),4):
-    if input[i] ==1:
-        input[ input[i+3] ] = input[ input[i+1] ] + input[ input[i+2] ]
-    elif input[i] ==2:
-        input[ input[i+3] ] = input[ input[i+1] ] * input[ input[i+2] ]
-    elif input[i] == 99:
-        break
+#for i in range(0,len(input),4):
+#    if input[i] ==1:
+#        input[ input[i+3] ] = input[ input[i+1] ] + input[ input[i+2] ]
+#    elif input[i] ==2:
+#        input[ input[i+3] ] = input[ input[i+1] ] * input[ input[i+2] ]
+#    elif input[i] == 99:
+#        break
+#        
+#print( input[0])
+
+
+
+#code for part 2: it is clear that there might be opcode parameter length fuckery at some point
+# so a quick rewrite of the loop above is in order, and make it a function
+
+def program(input):
+    PC = 0
+    while True:
+        if input[PC] ==1:
+            input[ input[PC+3] ] = input[ input[PC+1] ] + input[ input[PC+2] ]
+            PC=PC+4
+        elif input[PC] ==2:
+            input[ input[PC+3] ] = input[ input[PC+1] ] * input[ input[PC+2] ]
+            PC=PC+4
+        elif input[PC] == 99:
+            break
+        else:
+            raise Exception("invalid opcode") #oh ya i forgot this one
+    #print( input[0])
+    return input
+
+# now we put that inside a big old double loop to solve what input[1] and [2]
+# give an output value of 19690720
+
+for i in range(0,100):
+    for j in range(0,100):
+        inputcopy = list()
+        inputcopy[:] = input
+        inputcopy[1]=i
+        inputcopy[2]=j
+        try:
+            final = program(inputcopy)
+        if final[0] == 19690720:
+            print( [i,j])
+            break
         
-print( input[0])
+
+        
