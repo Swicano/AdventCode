@@ -12,7 +12,7 @@ input[1]=12
 input[2]=2
 
 # uncomment if you want to use a test input instead
-input[:] = testinput4
+#input[:] = testinput4
 
 #code for part 1
 #for i in range(0,len(input),4):
@@ -49,6 +49,8 @@ def program(input):
 # now we put that inside a big old double loop to solve what input[1] and [2]
 # give an output value of 19690720
 
+output = 0
+
 for i in range(0,100):
     for j in range(0,100):
         inputcopy = list()
@@ -57,9 +59,13 @@ for i in range(0,100):
         inputcopy[2]=j
         try:
             final = program(inputcopy)
+        except:
+            continue
         if final[0] == 19690720:
-            print( [i,j])
+            output =  [i,j]
+            print(output)
             break
-        
+
+print(100*output[0]+output[1])
 
         
