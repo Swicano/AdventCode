@@ -1,8 +1,52 @@
 #Day 7 buils on the opcode computer we've been building, by chaining them, 
 # so we start with a copy of the most recent from Day5:
 
-input = [3,8,1001,8,10,8,105,1,0,0,21,34,59,68,89,102,183,264,345,426,99999,3,9,102,5,9,9,1001,9,5,9,4,9,99,3,9,101,3,9,9,1002,9,5,9,101,5,9,9,1002,9,3,9,1001,9,5,9,4,9,99,3,9,101,5,9,9,4,9,99,3,9,102,4,9,9,101,3,9,9,102,5,9,9,101,4,9,9,4,9,99,3,9,1002,9,5,9,1001,9,2,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,101,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,1001,9,1,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,101,1,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,101,2,9,9,4,9,99,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,99]
+# so we start with an incode, a phase sequence, and a signal to be amplified.
+# inputs alternate between getting a phase angle and getting the old output, so
+# we just need to make phase setting list that gets popped back to front, but have
+# the output function place the output second from the end?
+#    visually:
+#  prev_output = out0                      # input to first amplifier
+#  Phase_list = [ p5, p4, p3, p2, p1]
+#  pretend_output(prev_output, Phase_list):
+#     temp = phase_list.pop()
+#     phase_list.append(prev_output)
+#     phase_list.appent(temp)
+#     return phase_list
 
+# phase list  = [ p5, p4, p3, p2, out0, p1]
+# after running the program once, the phase list has the phase popped off, and the old output (new input)
+# it runs, and outputs a new output (out1 aka in2) onto the list
+# phase list  = [ p5, p4, p3, out1, p2]
+
+
+
+incode = [3,8,1001,8,10,8,105,1,0,0,21,34,59,68,89,102,183,264,345,426,99999,3,9,102,5,9,9,1001,9,5,9,4,9,99,3,9,101,3,9,9,1002,9,5,9,101,5,9,9,1002,9,3,9,1001,9,5,9,4,9,99,3,9,101,5,9,9,4,9,99,3,9,102,4,9,9,101,3,9,9,102,5,9,9,101,4,9,9,4,9,99,3,9,1002,9,5,9,1001,9,2,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,101,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,1001,9,1,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,99,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1001,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,99,3,9,101,1,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,102,2,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,101,2,9,9,4,9,99,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,1001,9,1,9,4,9,3,9,1001,9,2,9,4,9,3,9,1002,9,2,9,4,9,99]
+
+Phaselist = []
+
+def print(output):
+    Phaselist.insert(-1,output)
+    
+def input(wasted):
+    return Phaselist.pop()
+    
+def make_permutations(list_of_inputs):
+    perms = []
+    if len(list_of_inputs) == 1:
+        perms = [list_of_inputs]
+    else:
+        for x in list_of_inputs: # we take one out, pass it down, get back a list of lists
+            subset = list_of_inputs.copy()
+            subset.remove(x)
+            subperms = make_permutations(subset)
+            # then for each sublist we get, we append the one we took out
+            # then combine all these lists together
+            for order in subperms:
+                order.insert(0,x)
+                perms.append(order)
+    return perms
+            
 # for automation-convenience I might wrapper over input and output to pull and push from a list.
 
 def program(incode):
@@ -124,23 +168,14 @@ def program(incode):
             raise Exception("invalid opcode") #oh ya i forgot this one
     return incode
 
-def decorator(f):
-    @functools.wraps(f)
-    def wrapper(*args, **kwds):
-        wait = delay
-        last_except = None
-        for _ in range(retry_count):
-            try:
-                result = f(*args, **kwds)
-                if result:
-                    return result
-            except allowed_exceptions as e:
-                print('delaying: {}'.format(wait))
-                print('allowed: ' + str(type(e)) + str(e))
-                last_except = e
-                time.sleep(wait)
-                wait *= falloff
-        if last_except is not None:
-            raise type(last_except) from last_except
-    return wrapper
-    
+phaseorderlist = make_permutations(list(range(0,5)))
+thrustlist = []
+
+for Phaselist in phaseorderlist:
+    print(0)
+    for i in range(0,5):
+        program(incode)
+    thrustlist.append(Phaselist)    
+maxthrust = max(thrustlist)
+phaseorderlist = make_permutations(list(range(0,5)))
+maxphase = phaseorderlist[thrustlist.index(maxthrust)]
