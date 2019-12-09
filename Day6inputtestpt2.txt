@@ -1,0 +1,13 @@
+G)H
+D)I
+D)E
+B)C
+C)D
+B)G
+E)J
+J)K
+K)L
+E)F
+COM)B
+K)YOU
+I)SAN

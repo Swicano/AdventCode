@@ -4,9 +4,10 @@
 #   no, that seems too easy. buld it as I read it.
 
 # the input is a lot of lines, so we will save it as a file and import it
-#inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day6input.txt'     # real input
-inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day6inputtest.txt' #42 is answer
-
+inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day6input.txt'     # real input
+#inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day6inputtest.txt' #42 is answer
+#inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day6inputtestscr1.txt' #42 is answer, still
+#inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day6inputtestpt2.txt' #54 is total, 4 transfers
 
 # general structure of building the tree: each line is a parent-child link
 #   assume the current tree is a set of trees (multiple roots), search each
@@ -42,20 +43,43 @@ with open(inputfile, 'r') as f:
             lazylinkedNext.append(-1)
         lazylinkedNext[lazylinkedData.index(child)] = link
 
+# now we have our lazy linked list. next we just iterate through each item in 
+# the list, and count the distance to com
 
-start = 'L'
+total = 0
+for start in lazylinkedData:
+    next = lazylinkedData.index(start)
+    guess = ''
+    count = 0
+    while next > -0.5:
+        guess = guess + lazylinkedData[next]
+        next = lazylinkedNext[next]
+        count +=1
+    print(count)
+    total += count -1
+print(total)
 
-next = lazylinkedData.index(start)
-guess = ''
+#For Part 2, we need to know the distance between two objects, based on the map made above
+# we can probably do this the easy way, put objects from the start to com in a set, 
+# the same for the destination object to com, then just take the symmetric difference
+# NOTE: this is cheaty, because it skips their crossover orbit, but compensates by including 
+# the objects themselves (in terms of the challenge specifics, the number will be right, 
+# but the actual path wont be...
 
+obj1 = 'YOU'
+orbits1 = set()
+next = lazylinkedData.index(obj1)
 while next > -0.5:
-    guess = guess + lazylinkedData[next]
+    orbits1.add(lazylinkedData[next])
+    next = lazylinkedNext[next]
+obj2 = 'SAN'
+orbits2 = set()
+next = lazylinkedData.index(obj2)
+while next > -0.5:
+    orbits2.add(lazylinkedData[next])
     next = lazylinkedNext[next]
 
-
-
-
-
+path = len(orbits1 ^ orbits2)-2
 
 
 
