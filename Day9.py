@@ -24,5 +24,5 @@ incodetest1 = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99] # outp
 incodetest2 = [1102,34915192,34915192,7,4,7,99,0] # a 16 digit number
 incodetest3 = [104,1125899906842624,99] # outputs 1125899906842624
 
-test = computer.opcomputer( incodetest3)
+test = computer.opcomputer( incode, inqueue = [2])
 test.run_until(outwait=0)

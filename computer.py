@@ -88,7 +88,8 @@ class opcomputer:
         elif mode == 2: # relative mode the value = code[rel_base+parameter]
             self.incode[ self.incode[mem_loc]+self.RB] = value
         else:
-            return none
+            raise Exception("invalid parameter mode") #oh ya i forgot this one
+            logger.error('invalid parameter mode')
             
             
     def compute_step(self):
@@ -119,11 +120,7 @@ class opcomputer:
                 self.PC += 2
             
         elif decode[0] == 4:    #opPrn------------------------ 
-            temp = 0
-            if decode[1]:           # immediate
-                temp = self.incode[self.PC+1]
-            else:
-                temp = self.incode[self.incode[self.PC+1]]
+            temp =  self.param_read( decode[1], self.incode[self.PC+1] )
             self.out_queue.append(temp)
             self.out_wait_flag = 1
             self.PC += 2
