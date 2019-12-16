@@ -28,7 +28,7 @@ inputfiletest3 = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day10i
 # 11,13 210 # 200th is at 8,2
 inputfiletest4 = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day10inputtest4.txt'
 
-inputfile = inputfiletest4
+#inputfile = inputfiletest4
 # key idea, if two asteroids are the same angle from the observation station, they can't be seen
 # BUT i dont need them to have the same angle theta, since we get that angle from arctan(a/b)
 #           we can just calculate a/b, and if those match, the angle will as well
