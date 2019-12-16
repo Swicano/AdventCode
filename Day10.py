@@ -25,10 +25,10 @@ inputfiletest1 = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day10i
 inputfiletest2 = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day10inputtest2.txt'
 #  6, 3  41
 inputfiletest3 = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day10inputtest3.txt'
-# 11,13 210
+# 11,13 210 # 200th is at 8,2
 inputfiletest4 = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day10inputtest4.txt'
 
-#inputfile = inputfiletest3
+inputfile = inputfiletest4
 # key idea, if two asteroids are the same angle from the observation station, they can't be seen
 # BUT i dont need them to have the same angle theta, since we get that angle from arctan(a/b)
 #           we can just calculate a/b, and if those match, the angle will as well
@@ -64,7 +64,7 @@ def spot_asteroids(station_loc, asteroid_locs):
                 for astx,asty in prelist+postlist if astx == coordx}
     return topset, midset, botset
 
-def find_nth_asteroid(stationloc, asteroid_coords, angle_list, n, rev=False):
+def find_nth_asteroid(stationloc, asteroid_coords, angle_list, n, quad=1, rev=False):
     vec = 0
     if angle_list == "inf":
         vec = (0,1)            
@@ -74,14 +74,23 @@ def find_nth_asteroid(stationloc, asteroid_coords, angle_list, n, rev=False):
         angle_list.sort(reverse = rev)
         angle = angle_list[n-1]
         frec = Fraction(angle).limit_denominator(1000)
-        vec = (frec.denominator, frec.numerator)
+        # by default the negative sign goes to the numerator (y)
+        # quad 1 2 3 4
+        #    x + - - + 
+        #      -1** int(quad/2)
+        #    y - - + + 
+        # frec - + - +
+        # so   1 -1 -1 1
+        denom = frec.denominator*(-1)**(int((quad)/2))
+        numer = frec.numerator*(-1)**(int((quad)/2))
+        vec = (denom, numer)
     loc = stationloc
     while True:
         loc = (loc[0]+vec[0],loc[1]+vec[1])
         if loc in asteroid_coords:
             return loc
         elif loc[0] > 1000000 or loc[1] > 1000000:
-            raise ('not found error')
+            raise Exception('not found error')
 
 #step one find all the asteroids
 asteroid_coords = []
@@ -124,6 +133,7 @@ station = asteroid_coords[asteroids_spotted.index(max_spotted)]
 topset, midset, botset = spot_asteroids(station, asteroid_coords)
 remain = 200 # the 200th asteroid is what we're looking for.
 while max_spotted < remain:
+    pass
     # figure this out later (not necessary for my puzzle solution)
     # but we need to remove all spotted asteroids from asteroid_coords, and generate a new
     # spot_asteroids 
@@ -131,16 +141,60 @@ target_loc = ()
 while remain:
     # in order to stay right of vertical, we need to split the topset
     toplistpos = [ x for x in topset if x>=0] # quadrant 1
-    toplistneg = topset -set(toplistpos)        # quadrant 2
+    toplistneg = list(topset -set(toplistpos) )       # quadrant 2
     botlistpos = [ x for x in botset if x>=0]      # quadrant 3
-    botlistneg =  botset -set(botlistpos)        # quadrant 4
-    #step one, check if 1 is in midset (vertical 0 degrees)
+    botlistneg =  list(botset -set(botlistpos))        # quadrant 4
+    logger.debug(f"len: top, mid, bot are {len(topset)},{len(midset)},{len(botset)} and the split len are top pos:{len(toplistpos)},top neg:{len(toplistneg)}, bot pos:{len(botlistpos)}, bot neg:{len(botlistneg)}")
+        #step one, check if 1 is in midset (vertical inf degrees)
     if 1 in midset:
+        midset.remove(1)
         if remain > 1:
             remain -= 1
         else:
-            target_loc = find_nth_asteroid( asteroid_coords[i], asteroid_coords,  "inf", 1)
+            target_loc = find_nth_asteroid( station, asteroid_coords,  "inf", 1)
+            remain = 0
+            logger.debug(f"found target at {target_loc} inside midset up")
+            continue #break?
     # then check quadrant 1
-
-
-
+    if len(toplistneg) < remain:
+        remain -= len(toplistneg)
+    else:
+        target_loc = find_nth_asteroid( station, asteroid_coords,  toplistneg, remain, quad = 1, rev = False)
+        remain = 0
+        logger.debug(f"found target at {target_loc} inside quad1")
+        continue
+    # then check quadrant 4
+    if len(botlistpos) < remain:
+        remain -= len(botlistpos)
+    else:
+        target_loc = find_nth_asteroid( station, asteroid_coords, botlistpos, remain,  quad = 4, rev = False)
+        remain = 0
+        logger.debug(f"found target at {target_loc} inside quad4")
+        continue
+    #check if -1 is in midset (vertical inf degrees)
+    if -1 in midset:
+        midset.remove(-1)
+        if remain > 1:
+            remain -= 1
+        else:
+            target_loc = find_nth_asteroid( station, asteroid_coords,  "inf", -1)
+            remain = 0
+            logger.debug(f"found target at {target_loc} inside midset down")
+            continue #break?
+    # then check quadrant 3
+    if len(botlistneg) < remain:
+        remain -= len(botlistneg)
+    else:
+        target_loc = find_nth_asteroid( station, asteroid_coords, botlistneg, remain, quad = 3)
+        remain = 0
+        logger.debug(f"found target at {target_loc} inside quad3")
+        continue
+    # then check quadrant 2
+    if len(toplistpos) < remain:
+        remain -= len(toplistpos)
+    else:
+        target_loc = find_nth_asteroid( station, asteroid_coords, toplistpos, remain, quad = 2)
+        remain = 0
+        logger.debug(f"found target at {target_loc} inside quad2")
+        continue
+print(target_loc)
