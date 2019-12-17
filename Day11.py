@@ -21,7 +21,7 @@ logger.addHandler(handler)
 import computer			
 # im thinking, you give it an input location, and color, and it returns a 'new color for that location' and the next position, keeps track of orientation internally.
 class hull_painter:
-    __init__(self, incode, x_loc=0, y_loc=0, orientation=0, startcolor=0 ):
+    def __init__(self, incode, x_loc=0, y_loc=0, orientation=0, startcolor=0 ):
         self.x = x_loc
         self.y = y_loc
         self.orient = orientation # 0 = up, 1 = right, 2 = down, 3 = left (clockwise)
@@ -37,21 +37,24 @@ class hull_painter:
         if self.x != inposx:
             logger.warning('inposx doesnt match internal position')
         if self.y != inposy:
-            logger.warning('inposx doesnt match internal position')
+            logger.warning('inposy doesnt match internal position')
         
         # first we run it until we get a output color
         while not (self.computer.out_wait_flag or self.done):
             self.computer.load_inqueue(self.incolor)
             # assume loading once is enough
             self.computer.run_until()
+            if self.computer.in_wait_flag:
+                logger.debug('input waiting')
             if self.computer.done_flag:
                 self.done = 1
                 break
             
         if self.done:
-            break
+            return self.done,None, None,None
             
         self.outcolor = self.computer.read_output()
+
         
         # then run it again to get a rotation and thus step
         while not (self.computer.out_wait_flag or self.done):
@@ -60,6 +63,8 @@ class hull_painter:
             self.computer.run_until()
             if self.computer.done_flag:
                 raise Exception('Halted mid-run')
+            if self.computer.in_wait_flag:
+                logger.debug('input waiting')
         
         # get a 0 for 'turn left' or 1 for 'turn right'
         rot_indic = self.computer.read_output()
@@ -68,16 +73,63 @@ class hull_painter:
             self.orient = (self.orient +1)%4
         else:
             self.orient = (self.orient -1)%4
-        #take a step into direction of orientation
+        #logger.debug(f"orientation is {self.orient}")
+        
+        #take a step into direction of new orientation
         # if 0, y+=1, 2: y-=1, 1: x+=1, 3: -=1
         if self.orient in {0,2}:
             self.y = self.y + 1 - self.orient
-        if self.orient in {1,3}:
+        elif self.orient in {1,3}:
             self.x = self.x + 2 - self.orient
-            
-        return self.outcolor, self.x, self.y
+        else:
+            logger.warning('orientation is not a cardinal direction')
+        logger.debug(self.x)
+        return self.done, self.outcolor, self.x, self.y
         
 
 # ok lets try to use it.
+
+if __name__ == "__main__":
+
+    #load in incode from file
+    inputcode = []
+    inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day11input.txt'
+    inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day11inputtest1.txt'
+    with open(inputfile) as fi:
+        logger.debug(f" reading from file {inputfile}")
+        instring = fi.read()
+        inputcode = [ int(code) for code in instring.split(',')] 
+    
+    #initialize a hullpainter
+    # and a hull
+    painter = hull_painter(inputcode)
+    spots = set()
+    hull = {(0,0):0}
+    lastx = 0
+    lasty = 0
+    done = 0
+    steps = 0
+    newspot = 1
+    # assume at least one step
+    currcolor = hull.get((lastx,lasty),0)
+    done, newcolor, newx, newy = painter.paint_step(currcolor, lastx, lasty)
+    while not done:
+        hull[(lastx,lasty)] = newcolor
+        spots.add((lastx,lasty))
+        steps+=1
+        lastx = newx
+        lasty = newy
+        currcolor = hull.get((lastx,lasty),0)
+        done, newcolor, newx, newy = painter.paint_step(currcolor, lastx, lasty)
+        if (newx,newy) not in hull:
+            newspot+=1
+                
+                
+                
+                
+                
+                
+                
+                
                 
                 
