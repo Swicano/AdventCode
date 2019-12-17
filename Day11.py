@@ -11,7 +11,7 @@ logger.propagate = False # this is set to false to avoid double messages, not ne
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler = logging.StreamHandler()
 # now we setup each of these to log at the DEBUG level (for now)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 handler.setLevel(logging.DEBUG)
 # finally we bind them together
 handler.setFormatter(formatter)
@@ -40,9 +40,9 @@ class hull_painter:
             logger.warning('inposy doesnt match internal position')
         
         # first we run it until we get a output color
+        self.computer.load_inqueue(self.incolor)
+        # assume loading once is enough
         while not (self.computer.out_wait_flag or self.done):
-            self.computer.load_inqueue(self.incolor)
-            # assume loading once is enough
             self.computer.run_until()
             if self.computer.in_wait_flag:
                 logger.debug('input waiting')
@@ -55,16 +55,20 @@ class hull_painter:
             
         self.outcolor = self.computer.read_output()
 
-        
+        self.computer.load_inqueue(self.incolor)
+        # assume loading once is enough (actually only need to load in once TOTAL, 
+        #  but the clear takes care of it
         # then run it again to get a rotation and thus step
         while not (self.computer.out_wait_flag or self.done):
-            self.computer.load_inqueue(self.incolor)
-            # assume loading once is enough
             self.computer.run_until()
             if self.computer.done_flag:
                 raise Exception('Halted mid-run')
             if self.computer.in_wait_flag:
                 logger.debug('input waiting')
+        
+        # try clearing the inqueue, since we overloaded it to make sure the program would
+        # never be starved of input.
+        self.computer.in_queue=[]
         
         # get a 0 for 'turn left' or 1 for 'turn right'
         rot_indic = self.computer.read_output()
@@ -83,9 +87,45 @@ class hull_painter:
             self.x = self.x + 2 - self.orient
         else:
             logger.warning('orientation is not a cardinal direction')
-        logger.debug(self.x)
         return self.done, self.outcolor, self.x, self.y
         
+def draw_hull(panel_dict, invert = False):
+    ''' takes an input dict of tuple(xloc,yloc):color, and returns an array (list of lists)
+        which has all locations in the input, and includes white space to fill in gaps'''
+    x_max=0
+    x_min=0
+    y_max=0
+    y_min=0
+    for x, y in panel_dict:
+        x_max = max(x,x_max)
+        x_min = min(x,x_min)
+        y_max = max(y,y_max)
+        y_min = min(y,y_min)
+    xlen = abs(x_max) + abs(x_min) + 11
+    ylen = abs(y_max) + abs(y_min) + 11
+    # canvas[0][0] should have coordinate (ymax+5,xmin-5,)
+    # so if xmin = -23, ymax = 56, origin should be (28, 61) so
+    #       (-23,56) ends up at [ 5][ 5] ( orig-y,orig+x)
+    #       (-10,10) ends up at [46][18] ( orig-y,orig+x)
+    xorig = abs(x_min) +5
+    yorig = y_max +5
+    
+    wht = '\u25A1' # orig
+    blk = '\u25A0'
+    if invert:
+        wht = '\u25A0' # swapped
+        blk = '\u25A1'
+    canvas = [ [blk for j in range(0,xlen)  ] for i in range(0,ylen) ]
+    
+    #paint the canvas
+    for px,py in panel_dict:
+        logger.debug( f'hull id {(px,py)} -origin {(xorig,yorig)} = [{yorig-py}][{xorig+px}]')
+        tmp = blk
+        if panel_dict[(px,py)]:
+            tmp = wht
+        canvas[yorig-py][xorig+px]=tmp
+    
+    return canvas
 
 # ok lets try to use it.
 
@@ -94,7 +134,7 @@ if __name__ == "__main__":
     #load in incode from file
     inputcode = []
     inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day11input.txt'
-    inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day11inputtest1.txt'
+    #inputfile = 'c:\\users\gfirest\Box Sync\Other shit\Github\AdventCode\Day11inputtest1.txt'
     with open(inputfile) as fi:
         logger.debug(f" reading from file {inputfile}")
         instring = fi.read()
@@ -104,7 +144,7 @@ if __name__ == "__main__":
     # and a hull
     painter = hull_painter(inputcode)
     spots = set()
-    hull = {(0,0):0}
+    hull = {(0,0):1}
     lastx = 0
     lasty = 0
     done = 0
@@ -123,11 +163,19 @@ if __name__ == "__main__":
         done, newcolor, newx, newy = painter.paint_step(currcolor, lastx, lasty)
         if (newx,newy) not in hull:
             newspot+=1
+
+    #part one ends with 2141 new panels painted, but for part 2 we want to start on white, 
+    # and finally, visualize what is being written.
                 
-                
-                
-                
-                
+    # I refuse to make the same coordinates mistake as last time.      
+    # i define a painting-render, which takes a list of input coordinates, makes a canvas
+    # large enough to house them all, with blank (black?) tiles, then iterates over the 
+    # 
+    
+    drawing = draw_hull(hull)
+    answer = [ ''.join(x) for x in drawing]    
+    for line in answer:
+        print(line)
                 
                 
                 
