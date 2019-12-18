@@ -54,7 +54,7 @@ class massive_body:
         #self.KinE = abs(self.vx)+abs(self.vy)+abs(self.vz)
         #self.TotE = self.PotE * self.KinE
         
-    def compare_pos( coord1, coord2):
+    def compare_pos(self, coord1, coord2):
         if coord1 == coord2:
             return 0
         else:
@@ -85,7 +85,7 @@ class massive_body:
     
     # repr should be unambiguous. if possible, if should be executable code that creates an identical object    
     def __repr__(self):
-        return f"massive_body( pos = {self.px,self.py,self.pz}, vel = {self.vx,self.vy,self.vz}, type = '{self.type}')"
+        return f"massive_body(pos={self.px,self.py,self.pz}, vel={self.vx,self.vy,self.vz}, type='{self.type}')"
              
              
              
