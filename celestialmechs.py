@@ -46,6 +46,8 @@ class massive_body:
             self.vy=vel[1]
             self.vz=vel[2]
         self.type = type
+        # below this these are dependent variables and dont need to be included in __eq__
+        # they will match by virtue of pos and vel matching
         self.KinE=0
         self.PotE=0
         self.TotE=0
@@ -86,17 +88,28 @@ class massive_body:
     # repr should be unambiguous. if possible, if should be executable code that creates an identical object    
     def __repr__(self):
         return f"massive_body(pos={self.px,self.py,self.pz}, vel={self.vx,self.vy,self.vz}, type='{self.type}')"
+        
+    def __eq__(self,other):
+        position_equality = (self.px == other.px) & (self.py == other.py) &(self.pz == other.pz)
+        velocity_equality = (self.vx == other.vx) & (self.vy == other.vy) &(self.vz == other.vz)
+        type_equality = self.type == other.type
+        return (position_equality & velocity_equality & type_equality)
              
              
              
              
+if __name__=="__main__":
+    obj1 = massive_body()
+    obj2 = massive_body(pos = (0,1,0))
+    obj3 = massive_body(pos = (-14,12,17))
              
+    logger.debug(f' obj1 is obj2: {obj1 is obj2}, obj1 == obj2: {obj1 == obj2}')
+    
+    obj2.py = 0
+    logger.debug(f'set obj2 to same position (and vel) as obj1')
+    logger.debug(f' obj1 is obj2: {obj1 is obj2}, obj1 == obj2: {obj1 == obj2}')
              
-             
-             
-             
-             
-             
+    obj2.py = 1
              
              
              

@@ -14,7 +14,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 import celestialmechs as cs
-
+import copy ##2
 
 
 
@@ -32,14 +32,17 @@ if __name__ == "__main__":
     system = []
     with open(inputfile) as fi:
         for line in fi.readlines():
-            coordsrough = line.split(',') #gives us len 3 dict with some extra crap
+            #convert line into a len 3 list with some extra crap
+            coordsrough = line.split(',') 
+            # clean up that rough list, and formatted it into a tuple(x,y,z)
             coords = tuple([ int(val.strip('<xyz=> \n')) for val in coordsrough])
-            # cleaned up that rough dict, and formatted it
             system.append(cs.massive_body(pos = coords))
          
     for primary in system:
         logger.debug(primary)
-
+        
+    system0 = copy.deepcopy(system)##2  need a copy to compare against
+    
     # now that we have set up our simulation, we can begin doing time steps
     totalsteps = 1000
     report_inc = 100    
@@ -62,4 +65,11 @@ if __name__ == "__main__":
                 logger.debug(primary)
     
     totenerg = sum([ obj.TotE for obj in system])
+    
+    #Part2: at what step does the universe repeat itself?
+    # two ideas: 1: just shove a hash of the system at each time-step into a giant as dict
+    #            2: IF the universe repeats itself, then it must be on a cycle, and every point repeats itself
+    #              (not sure if thats true), therefore: we just save the FIRST time step, and compare all future
+    #              steps to that.
+    # out of laziness lets start with 2. (new lines marked with '##2' at end
     
