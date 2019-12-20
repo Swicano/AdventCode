@@ -57,19 +57,33 @@ class massive_body:
         #self.TotE = self.PotE * self.KinE
         
     def compare_pos(self, coord1, coord2):
+        '''
         if coord1 == coord2:
             return 0
+        elif coord2 > coord1: # this method is 2.7542108456293742e-05 per iteration. lel
+            return 1
         else:
-            # check if coordinate 2 is behind coordinate 1, if so, -1, else 1
-            relation = int(coord2<coord1)
-            return (-1)**(relation)
+            return -1
+        '''
+        if coord2 > coord1: # this method is 2.7542108456293742e-05 per iteration. lel
+            return 1
+        elif coord1 == coord2:
+            return 0
+        else:
+            return -1
+            
+            
+        #else: # this method has speed 3.8243851549625396e-05 per iteration loop with 4 objects
+        #    # check if coordinate 2 is behind coordinate 1, if so, -1, else 1
+        #    relation = int(coord2<coord1)
+        #    return (-1)**(relation)
     
     def apply_gravity(self, body_object, algo=1):
         # i assume we will do ACTUAL math at some point.   
-        if algo == 1:
-            self.vx = self.vx + self.compare_pos(self.px, body_object.px)
-            self.vy = self.vy + self.compare_pos(self.py, body_object.py)
-            self.vz = self.vz + self.compare_pos(self.pz, body_object.pz)
+        # if algo == 1: ##2 if we need to change the algo re-open this later
+        self.vx = self.vx + self.compare_pos(self.px, body_object.px)
+        self.vy = self.vy + self.compare_pos(self.py, body_object.py)
+        self.vz = self.vz + self.compare_pos(self.pz, body_object.pz)
              
     def apply_velocity(self):
         self.px += self.vx
@@ -94,6 +108,9 @@ class massive_body:
         velocity_equality = (self.vx == other.vx) & (self.vy == other.vy) &(self.vz == other.vz)
         type_equality = self.type == other.type
         return (position_equality & velocity_equality & type_equality)
+        
+    def __hash__(self):
+        return hash((self.px,self.py,self.pz,self.vx,self.vy,self.vz,self.type))
              
              
              
@@ -103,11 +120,11 @@ if __name__=="__main__":
     obj2 = massive_body(pos = (0,1,0))
     obj3 = massive_body(pos = (-14,12,17))
              
-    logger.debug(f' obj1 is obj2: {obj1 is obj2}, obj1 == obj2: {obj1 == obj2}')
+    logger.debug(f' obj1 is obj2: {obj1 is obj2}, obj1 == obj2: {obj1 == obj2}, and hashes: {hash(obj1) == hash(obj2)}')
     
     obj2.py = 0
     logger.debug(f'set obj2 to same position (and vel) as obj1')
-    logger.debug(f' obj1 is obj2: {obj1 is obj2}, obj1 == obj2: {obj1 == obj2}')
+    logger.debug(f' obj1 is obj2: {obj1 is obj2}, obj1 == obj2: {obj1 == obj2}, and hashes: {hash(obj1) == hash(obj2)}')
              
     obj2.py = 1
              
